@@ -24,9 +24,10 @@ Rendering workloads are naturally fault-tolerant and seem to be good match for o
 ### Proposed scope of the project
 
 - implement solution for distributed rendering using Blender
-- interruptions will be detected and actions will be taken to achieve maximum effectiveness
+- interruptions will be detected and actions will be taken to achieve maximum effectiveness - including making a research about existing spot instances management solutions and possibly using them
 - solution will be run for a few example workloads with different parameters (like instance count or different methods of detecting interruption)
-- statistics like time needed or interruption count will be gathered
+- gather statistics like time needed or interruption count (including comparison based on size of the machines)
+- compare costs of Spot vs On-Demand instances
 
 ## Sources
 
