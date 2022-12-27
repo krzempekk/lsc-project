@@ -14,5 +14,5 @@ apt update -y
 apt install -y xvfb
 apt install -y libfontconfig1 libxrender1 libxi6 libgconf-2-4 libxkbcommon-x11-0
 
-curl https://raw.githubusercontent.com/krzempekk/lsc-project/eeebab5134ee58f13838bc3a653762329a555123/worker.py -LJO
+curl https://raw.githubusercontent.com/krzempekk/lsc-project/main/worker.py -LJO
 python3 worker.py -q lsc-queue-1 >/var/tmp/worker_output &

@@ -21,6 +21,15 @@ Type of workload we chose for this project is rendering using Blender. Rendering
 
 Rendering workloads are naturally fault-tolerant and seem to be good match for our Spot Instances showcase. We could reduce impact of interruptions by, for example, regularly uploading rendered frames to some S3 bucket and having one instance dedicated to distributing rendering tasks to other instances.
 
+### Tests
+
+We don't have influence on how often interruptions will occur (or whether they will occur). However, for local testing whether our solution will behave properly in case of interruption we can use Amazon EC2 Metadata Mock.
+
+For tests on AWS, few Blender demo scenes will be used as input data. One of test cases will include low number of instances (like 2-3) and other will include higher number of instances (like 10-15).
+In those test cases, following statistics will be gathered: overall completion time, average time to render one frame, interruption count.
+
+Those two test cases will be run on On-Demand instances and on Spot instances and cost for those two scenarios will be compared. 
+
 ### Proposed scope of the project
 
 - implement solution for distributed rendering using Blender
@@ -34,3 +43,4 @@ Rendering workloads are naturally fault-tolerant and seem to be good match for o
 - [Best practices for handling EC2 Spot Instance interruptions - AWS blog post](https://aws.amazon.com/blogs/compute/best-practices-for-handling-ec2-spot-instance-interruptions/)
 - [Blender CLI docs](https://docs.blender.org/manual/en/latest/advanced/command_line/arguments.html)
 - [Library of Blender demo scenes](https://www.blender.org/download/demo-files/)
+- [Tool for EC2 instance metadata service simulation](https://github.com/aws/amazon-ec2-metadata-mock)
