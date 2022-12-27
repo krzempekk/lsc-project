@@ -1,0 +1,18 @@
+#!/bin/bash
+curl -O https://bootstrap.pypa.io/get-pip.py
+python3 get-pip.py --user
+export PATH=/root/.local/bin:$PATH
+
+export AWS_DEFAULT_REGION=us-east-1
+export AWS_ACCESS_KEY_ID=XXXX
+export AWS_SECRET_ACCESS_KEY=XXXX
+export AWS_SESSION_TOKEN=XXXX
+pip install boto3
+
+snap install blender --classic
+apt update -y
+apt install -y xvfb
+apt install -y libfontconfig1 libxrender1 libxi6 libgconf-2-4 libxkbcommon-x11-0
+
+curl https://raw.githubusercontent.com/krzempekk/lsc-project/eeebab5134ee58f13838bc3a653762329a555123/worker.py -LJO
+python3 worker.py -q lsc-queue-1 >/var/tmp/worker_output &

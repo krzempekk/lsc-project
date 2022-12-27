@@ -7,7 +7,7 @@ parser = argparse.ArgumentParser(
     description="Worker script for distributed rendering using Blender",
     formatter_class=argparse.ArgumentDefaultsHelpFormatter
 )
-parser.add_argument("-q", "--queue-name", help="SQS queue from which tasks will be taken")
+parser.add_argument("-q", "--queue-name", help="SQS queue from which tasks will be taken", required=True)
 # parser.add_argument("frame_start", help="Number of first frame to render")
 # parser.add_argument("frame_end", help="Number of last frame to render")
 # parser.add_argument("-b", "--blend_file", help=".blend file name", required=True)
@@ -40,7 +40,7 @@ def process_task(task_args):
         s3_client.download_file(download_bucket_name, blend_file, f"blend/{blend_file}")
 
     for frame_index in range(frame_start, frame_end + 1):
-        os.system(f"blender -b ./blend/{blend_file} -o ./renders/frame_##### -f {frame_index}")
+        os.system(f"xvfb-run -a blender -b ./blend/{blend_file} -o ./renders/frame_##### -f {frame_index}")
         if upload_bucket_name is not None:
             s3_client.upload_file(f"./renders/frame_{frame_index:05}.png", upload_bucket_name,
                                   f"frame_{frame_index:05}.png")
