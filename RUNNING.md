@@ -1,7 +1,9 @@
 # How to run?
 
 1. Set proper values for `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` and `AWS_SESSION_TOKEN` variables in `instance_script`.
-2. Create following AWS resources:
+2a. Use init_resources.py script to create required AWS resources
+OR
+2b. Create following AWS resources manually:
    - One or two S3 buckets 
      - one for input `.blend` files (input bucket) 
      - second for output frames in `.png` format (output bucket) 
