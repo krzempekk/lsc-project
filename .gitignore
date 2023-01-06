@@ -1,1 +1,4 @@
 .idea/
+venv
+*.pem
+cleanup_resources_info.json
