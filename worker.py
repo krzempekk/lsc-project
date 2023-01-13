@@ -2,24 +2,23 @@ import os
 import argparse
 import boto3
 import requests
+import subprocess
+import signal
 
 parser = argparse.ArgumentParser(
     description="Worker script for distributed rendering using Blender",
     formatter_class=argparse.ArgumentDefaultsHelpFormatter
 )
-parser.add_argument("-q", "--queue-name", help="SQS queue from which tasks will be taken", required=True)
-# parser.add_argument("frame_start", help="Number of first frame to render")
-# parser.add_argument("frame_end", help="Number of last frame to render")
-# parser.add_argument("-b", "--blend_file", help=".blend file name", required=True)
-# parser.add_argument("-db", "--download_bucket", help="Name of S3 bucket from which .blend file will be downloaded")
-# parser.add_argument("-ub", "--upload_bucket",
-#                     help="Name of S3 bucket to which rendered frames will be uploaded. If omitted, no upload will happen")
+parser.add_argument("-tq", "--task-queue-name", help="SQS queue from which tasks will be taken", required=True)
+parser.add_argument("-nq", "--notification-queue-name",
+                    help="SQS queue to which notifications about task completion will be sent", required=True)
 args = parser.parse_args()
 
 s3_client = boto3.client("s3")
 sqs_client = boto3.client('sqs')
 
-queue_name = args.queue_name
+task_queue_name = args.task_queue_name
+notification_queue_name = args.notification_queue_name
 
 
 def is_instance_interrupted():
@@ -40,19 +39,32 @@ def process_task(task_args):
         s3_client.download_file(download_bucket_name, blend_file, f"blend/{blend_file}")
 
     for frame_index in range(frame_start, frame_end + 1):
-        os.system(f"xvfb-run -a blender -b ./blend/{blend_file} -o ./renders/frame_##### -f {frame_index}")
+        program = f"xvfb-run -a blender -b ./blend/{blend_file} -o ./renders/frame_##### -f {frame_index}"
+        process = subprocess.Popen(program)
+
+        terminated = None
+        while terminated is None:
+            try:
+                terminated = process.wait(15)
+            except:
+                if is_instance_interrupted():
+                    print("Instance interrupted, quitting...")
+                    os.killpg(os.getpgid(process.pid), signal.SIGTERM)
+                    return frame_start, frame_index - 1, True
+
         if upload_bucket_name is not None:
             s3_client.upload_file(f"./renders/frame_{frame_index:05}.png", upload_bucket_name,
                                   f"frame_{frame_index:05}.png")
+
         if is_instance_interrupted():
             print("Instance interrupted, quitting...")
-            return frame_index + 1, frame_end
-    return None
+            return frame_start, frame_index, True
+    return frame_start, frame_end, False
 
 
 def get_task_from_queue():
     response = sqs_client.receive_message(
-        QueueUrl=queue_name,
+        QueueUrl=task_queue_name,
         AttributeNames=['All'],
         MaxNumberOfMessages=1,
         MessageAttributeNames=['All'],
@@ -67,7 +79,7 @@ def get_task_from_queue():
     receipt_handle = message['ReceiptHandle']
 
     sqs_client.delete_message(
-        QueueUrl=queue_name,
+        QueueUrl=task_queue_name,
         ReceiptHandle=receipt_handle
     )
 
@@ -84,8 +96,32 @@ def get_task_from_queue():
     return message_args
 
 
+def send_task_confirmation(rendered_frame_start, rendered_frame_end, is_interrupted):
+    response = sqs_client.send_message(
+        QueueUrl=notification_queue_name,
+        MessageAttributes={
+            'rendered_frame_start': {
+                'DataType': 'Number',
+                'StringValue': f'{rendered_frame_start}'
+            },
+            'rendered_frame_end': {
+                'DataType': 'Number',
+                'StringValue': f'{rendered_frame_end}'
+            },
+            'is_interrupted': {
+                'DataType': 'Number',
+                'StringValue': f'{1 if is_interrupted else 0}'
+            },
+        },
+        MessageBody="rendering task confirmation"
+    )
+
+    print(response['MessageId'])
+
+
 while True:
     task = get_task_from_queue()
     print(f"received task: {task}")
     if task is not None:
-        process_task(task)
+        task_info = process_task(task)
+        send_task_confirmation(*task_info)
