@@ -22,3 +22,6 @@ OR
    - number of tasks to which frames range will be split
    - download bucket from which `.blend` files will be downloaded by workers
    - upload bucket to which `.png` frames will be sent by workers
+
+https://aws.amazon.com/ec2/spot/instance-advisor/
+https://aws.amazon.com/ec2/spot/pricing/

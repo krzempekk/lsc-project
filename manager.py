@@ -118,9 +118,11 @@ while len(tasks) != 0:
         rendered_frame_end = confirmation['rendered_frame_end']
 
         original_task = list(filter(lambda x: x[0] == rendered_frame_start, tasks))[0]
+        tasks.remove(original_task)
         if original_task[1] != rendered_frame_end:
             print(f"Task {original_task} completed partially. Re-adding unfinished part - ({rendered_frame_end}, {original_task[1]})")
             send_single_task(rendered_frame_end + 1, original_task[1], upload_bucket, download_bucket, blend_file)
+            tasks.append((rendered_frame_end + 1, original_task[1]))
         else:
             print(f"Task {original_task} fully completed!")
 
