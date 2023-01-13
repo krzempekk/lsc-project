@@ -5,7 +5,8 @@ import base64
 AUTOSCALING_GROUP = 'autoscaling_group'
 INPUT_BUCKET = "lsc-input-bucket"
 OUTPUT_BUCKET = "lsc-output-bucket"
-LAUNCH_TEMPLATE = 'worker_template'
+LAUNCH_TEMPLATE = 'worker_template_1'
+SUBNET_ID = 'subnet-0ad8764647188b564'
 
 sqs = boto3.resource('sqs')
 ec2_client = boto3.client('ec2')
@@ -58,7 +59,7 @@ response = autoscaling_client.create_auto_scaling_group(
     },
     MinSize=1,
     MaxSize=4,
-    VPCZoneIdentifier='subnet-03bdb50a153c1ecd4'
+    VPCZoneIdentifier=SUBNET_ID
 )
 print(response)
 cleanup_resources_info['autoscaling_group_name'] = AUTOSCALING_GROUP
