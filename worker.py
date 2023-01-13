@@ -40,7 +40,7 @@ def process_task(task_args):
 
     for frame_index in range(frame_start, frame_end + 1):
         program = f"xvfb-run -a blender -b ./blend/{blend_file} -o ./renders/frame_##### -f {frame_index}"
-        process = subprocess.Popen(program)
+        process = subprocess.Popen(program, shell=True, preexec_fn=os.setsid)
 
         terminated = None
         while terminated is None:
