@@ -81,7 +81,7 @@ def get_confirmation_from_queue():
     receipt_handle = message['ReceiptHandle']
 
     sqs_client.delete_message(
-        QueueUrl=task_queue_name,
+        QueueUrl=notification_queue_name,
         ReceiptHandle=receipt_handle
     )
 
@@ -107,14 +107,15 @@ for i in range(task_count):
     send_single_task(task_frame_start, task_frame_end, upload_bucket, download_bucket, blend_file)
     tasks.append((task_frame_start, task_frame_end))
 
+print(f"Added tasks: {tasks}")
 
 while len(tasks) != 0:
     print(f"{len(tasks)} tasks remaining...")
     confirmation = get_confirmation_from_queue()
     if confirmation is not None:
-        interruption_count += confirmation.is_interrupted
-        rendered_frame_start = confirmation.rendered_frame_start
-        rendered_frame_end = confirmation.rendered_frame_end
+        interruption_count += confirmation['is_interrupted']
+        rendered_frame_start = confirmation['rendered_frame_start']
+        rendered_frame_end = confirmation['rendered_frame_end']
 
         original_task = list(filter(lambda x: x[0] == rendered_frame_start, tasks))[0]
         if original_task[1] != rendered_frame_end:
