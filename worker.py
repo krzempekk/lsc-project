@@ -119,6 +119,7 @@ def send_task_confirmation(rendered_frame_start, rendered_frame_end, is_interrup
     print(response['MessageId'])
 
 
+print("Starting worker")
 while True:
     task = get_task_from_queue()
     print(f"received task: {task}")

@@ -127,4 +127,4 @@ while len(tasks) != 0:
             print(f"Task {original_task} fully completed!")
 
 time_elapsed = time.time() - time_start
-print(f"All task completed! Elapsed time: {time_elapsed}")
+print(f"All task completed! Elapsed time: {time_elapsed} with {interruption_count} interruptions")
